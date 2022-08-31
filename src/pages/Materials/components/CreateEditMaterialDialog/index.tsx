@@ -6,7 +6,6 @@ import {
   Box,
   Container,
   CssBaseline,
-  FormControl,
   Grid,
   InputLabel,
   MenuItem,
@@ -21,22 +20,25 @@ import {
   updateMaterial,
 } from "../../../../services/firebase/firestore/material";
 import { v4 as uuid } from "uuid";
+import { Unity } from "../../../../models/Unity";
 
 interface CreateEditMaterialDialogProps {
   open: boolean;
   onConfirm: () => void;
   onCancel: () => void;
   selectedItem?: Material;
+  unities: Unity[];
 }
 
 export default function CreateEditMaterialDialog({
   open,
   selectedItem,
+  unities,
   onConfirm,
   onCancel,
 }: CreateEditMaterialDialogProps) {
   const [errorMessage, setErrorMessage] = useState("");
-  const [selectedUnity, setSelectedUnity] = useState("");
+  const [selectedUnity, setSelectedUnity] = useState<Unity>();
 
   const title = useMemo(
     () => (selectedItem ? "Editar Material" : "Novo Material"),
@@ -44,8 +46,8 @@ export default function CreateEditMaterialDialog({
   );
 
   const handleSelectedUnityChange = (event: SelectChangeEvent) => {
-    console.log("selected item", event.target.value);
-    setSelectedUnity(event.target.value);
+    const unity = unities.find((item) => item.id === event.target.value);
+    setSelectedUnity(unity);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -68,16 +70,24 @@ export default function CreateEditMaterialDialog({
       name: materialName,
       description: materialDescription,
       quantity: Number(quantity),
-      unityId: selectedUnity,
+      unityId: selectedUnity?.id || "",
       createdAt: selectedItem
         ? selectedItem.createdAt
         : new Date().toDateString(),
     };
 
+    let response = undefined;
     if (selectedItem) {
-      await updateMaterial(material);
+      response = await updateMaterial(material);
     } else {
-      await addMaterial(material);
+      response = await addMaterial(material);
+    }
+
+    if (!response) {
+      setErrorMessage(
+        "Não foi possível realizar esta ação no momento. Tente mais tarde."
+      );
+      return;
     }
 
     setErrorMessage("");
@@ -123,6 +133,7 @@ export default function CreateEditMaterialDialog({
                   id="materialName"
                   label="Nome do Material"
                   autoFocus
+                  defaultValue={selectedItem?.name || ""}
                   error={errorMessage.length > 0}
                 />
               </Grid>
@@ -133,23 +144,27 @@ export default function CreateEditMaterialDialog({
                   id="quantity"
                   label="Quantidade"
                   name="quantity"
+                  defaultValue={selectedItem?.quantity || ""}
                 />
               </Grid>
               <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="unity-label">Unidade de Medida</InputLabel>
-                  <Select
-                    labelId="unity-label"
-                    id="unity"
-                    value={selectedUnity}
-                    label="Unidade de Medida"
-                    onChange={handleSelectedUnityChange}
-                  >
-                    <MenuItem value={10}>Metros (mt)</MenuItem>
-                    <MenuItem value={20}>Centímetros (cm)</MenuItem>
-                    <MenuItem value={30}>Kilos (kg)</MenuItem>
-                  </Select>
-                </FormControl>
+                <InputLabel id="unity-label">Unidade de Medida</InputLabel>
+                <Select
+                  labelId="unity-label"
+                  id="unity"
+                  fullWidth
+                  value={selectedUnity?.id}
+                  defaultValue={selectedItem?.unityId}
+                  label="Unidade de Medida"
+                  onChange={handleSelectedUnityChange}
+                >
+                  {unities.map((unity) => (
+                    <MenuItem
+                      key={unity.id}
+                      value={unity.id}
+                    >{`${unity.name} (${unity.initials})`}</MenuItem>
+                  ))}
+                </Select>
               </Grid>
               <Grid item xs={12}>
                 <TextField
@@ -158,6 +173,7 @@ export default function CreateEditMaterialDialog({
                   id="materialDescription"
                   label="Descrição do Material"
                   name="materialDescription"
+                  defaultValue={selectedItem?.description || ""}
                 />
               </Grid>
             </Grid>
@@ -183,7 +199,7 @@ export default function CreateEditMaterialDialog({
                 color="success"
                 sx={{ mt: 3, mb: 2 }}
               >
-                Adicionar
+                {selectedItem ? "Atualizar" : "Adicionar"}
               </Button>
             </DialogActions>
           </Box>

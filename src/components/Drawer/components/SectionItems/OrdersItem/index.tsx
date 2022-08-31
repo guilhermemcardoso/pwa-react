@@ -1,25 +1,25 @@
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import ExtensionIcon from '@mui/icons-material/Extension';
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import { useNavigate } from "react-router-dom";
 import { SectionItemProps } from "../../..";
 
-const MaterialsItem = ({ toggleDrawer }: SectionItemProps) => {
+const OrdersItem = ({ toggleDrawer }: SectionItemProps) => {
   const navigate = useNavigate();
   const handleOnClick = () => {
-    navigate("materials");
+    navigate("orders");
     toggleDrawer(false);
   };
 
   return (
     <ListItemButton>
       <ListItemIcon>
-        <ExtensionIcon onClick={handleOnClick} />
+        <BookmarkBorderIcon onClick={handleOnClick} />
       </ListItemIcon>
-      <ListItemText primary="Materiais" onClick={handleOnClick} />
+      <ListItemText primary="Pedidos" onClick={handleOnClick} />
     </ListItemButton>
   );
 };
 
-export default MaterialsItem;
+export default OrdersItem;

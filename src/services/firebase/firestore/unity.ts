@@ -50,16 +50,21 @@ export function listen(callback: (unities: Unity[]) => void) {
 }
 
 export async function getUnities(): Promise<Unity[]> {
-  const db = getFirestore();
-  const q = query(collection(db, collectionName));
+  try {
+    const db = getFirestore();
+    const q = query(collection(db, collectionName));
 
-  const querySnapshot = await getDocs(q);
-  const unities: Unity[] = [];
-  querySnapshot.forEach((doc) => {
-    const unity = doc.data() as Unity;
-    unities.push(unity);
-  });
-  return unities;
+    const querySnapshot = await getDocs(q);
+    const unities: Unity[] = [];
+    querySnapshot.forEach((doc) => {
+      const unity = doc.data() as Unity;
+      unities.push(unity);
+    });
+    return unities;
+  } catch (error) {
+    console.log("ERROR - getUnities", error);
+    return [];
+  }
 }
 
 export async function deleteUnity(unities: Unity[]): Promise<boolean> {

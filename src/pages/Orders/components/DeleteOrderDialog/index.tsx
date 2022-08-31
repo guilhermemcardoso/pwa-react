@@ -3,22 +3,22 @@ import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import { Box, Container, CssBaseline, Grid, Typography } from "@mui/material";
-import { Unity } from "../../../../models/Unity";
-import { deleteUnity } from "../../../../services/firebase/firestore/unity";
+import { Order } from "../../../../models/Order";
+import { deleteOrder } from "../../../../services/firebase/firestore/order";
 
-interface DeleteUnityDialogProps {
+interface DeleteOrderDialogProps {
   open: boolean;
   onConfirm: () => void;
   onCancel: () => void;
-  selectedItems: Unity[];
+  selectedItems: Order[];
 }
 
-export default function DeleteUnityDialog({
+export default function DeleteOrderDialog({
   open,
   selectedItems,
   onConfirm,
   onCancel,
-}: DeleteUnityDialogProps) {
+}: DeleteOrderDialogProps) {
   const [errorMessage, setErrorMessage] = useState("");
 
   const title = useMemo(() => {
@@ -29,7 +29,7 @@ export default function DeleteUnityDialog({
   }, [selectedItems]);
 
   const handleSubmit = async () => {
-    const response = await deleteUnity(selectedItems);
+    const response = await deleteOrder(selectedItems);
     if (!response) {
       setErrorMessage(
         "Não foi possível excluir os itens selecionados. Tente novamente mais tarde"

@@ -4,21 +4,30 @@ import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
 import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
-import { Button } from "@mui/material";
+import { Box, Button } from "@mui/material";
+import { Material } from "../../../../models/Material";
 
 interface TableToolbarProps {
-  numSelected: number;
+  selectedItems: Material[];
   onAddClick: () => void;
+  onDeleteClick: () => void;
+  onUpdateClick: () => void;
 }
 
-const TableToolbar = ({ numSelected, onAddClick }: TableToolbarProps) => {
+const TableToolbar = ({
+  selectedItems,
+  onAddClick,
+  onDeleteClick,
+  onUpdateClick,
+}: TableToolbarProps) => {
   return (
     <Toolbar
       sx={{
         pl: { sm: 2 },
         pr: { xs: 1, sm: 1 },
-        ...(numSelected > 0 && {
+        ...(selectedItems.length > 0 && {
           bgcolor: (theme) =>
             alpha(
               theme.palette.primary.main,
@@ -27,14 +36,14 @@ const TableToolbar = ({ numSelected, onAddClick }: TableToolbarProps) => {
         }),
       }}
     >
-      {numSelected > 0 ? (
+      {selectedItems.length > 0 ? (
         <Typography
           sx={{ flex: "1 1 100%" }}
           color="inherit"
           variant="subtitle1"
           component="div"
         >
-          {numSelected} selecionado(s)
+          {selectedItems.length} selecionado(s)
         </Typography>
       ) : (
         <Typography
@@ -46,12 +55,21 @@ const TableToolbar = ({ numSelected, onAddClick }: TableToolbarProps) => {
           Materiais
         </Typography>
       )}
-      {numSelected > 0 ? (
-        <Tooltip title="Remover">
-          <IconButton>
-            <DeleteIcon />
-          </IconButton>
-        </Tooltip>
+      {selectedItems.length > 0 ? (
+        <Box sx={{ display: "flex", flexDirection: "row" }}>
+          <Tooltip title="Remover">
+            <IconButton onClick={onDeleteClick}>
+              <DeleteIcon />
+            </IconButton>
+          </Tooltip>
+          {selectedItems.length === 1 && (
+            <Tooltip title="Editar">
+              <IconButton onClick={onUpdateClick}>
+                <EditIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
       ) : (
         <Tooltip title="Adicionar material">
           <Button variant="contained" onClick={onAddClick}>

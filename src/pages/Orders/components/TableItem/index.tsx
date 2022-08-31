@@ -3,41 +3,35 @@ import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import Checkbox from "@mui/material/Checkbox";
 import { Product } from "../../../../models/Product";
-import { Unity } from "../../../../models/Unity";
-import { Material } from "../../../../models/Material";
+import { Order } from "../../../../models/Order";
 
 interface TableItemProps {
-  item: Product;
-  onSelect: (item: Product) => void;
+  item: Order;
+  onSelect: (item: Order) => void;
   selected: boolean;
-  unities: Unity[];
-  materials: Material[];
+  products: Product[];
 }
 
 export default function TableItem({
   item,
   onSelect,
   selected,
-  materials,
-  unities,
+  products,
 }: TableItemProps) {
   const handleClick = (event: React.MouseEvent<unknown>) => {
     onSelect(item);
   };
 
-  const materialCol = useMemo(() => {
+  const productCol = useMemo(() => {
     let result = "";
-    item.materials.map((item) => {
-      const material = materials.find((n) => n.id === item.materialId);
-      if (material) {
-        const unity = unities.find((k) => k.id === material.unityId);
-        if (unity) {
-          result += ` ${material.name} (${item.quantity} ${unity.initials})`;
-        }
+    item.products.forEach((item) => {
+      const product = products.find((n) => n.id === item.productId);
+      if (product) {
+        result += ` ${product.name} (${item.quantity})`;
       }
     });
     return result;
-  }, [item.materials, materials, unities]);
+  }, [item.products, products]);
 
   return (
     <TableRow
@@ -54,16 +48,22 @@ export default function TableItem({
           color="primary"
           checked={selected}
           inputProps={{
-            "aria-labelledby": item.name,
+            "aria-labelledby": item.customerName,
           }}
         />
       </TableCell>
-      <TableCell component="th" id={item.name} scope="row" padding="none">
-        {item.name}
+      <TableCell
+        component="th"
+        id={item.customerName}
+        scope="row"
+        padding="none"
+      >
+        {item.customerName}
       </TableCell>
       <TableCell align="left">{item.description}</TableCell>
-      <TableCell align="left">{item.price}</TableCell>
-      <TableCell align="left">{materialCol}</TableCell>
+      <TableCell align="left">{productCol}</TableCell>
+      <TableCell align="left">{item.discount}</TableCell>
+      <TableCell align="left">{item.total}</TableCell>
       <TableCell align="left">{item.createdAt}</TableCell>
     </TableRow>
   );

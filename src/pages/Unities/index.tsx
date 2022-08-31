@@ -13,7 +13,7 @@ import { getUnities } from "../../services/firebase/firestore/unity";
 import { Unity } from "../../models/Unity";
 import DeleteUnityDialog from "./components/DeleteUnityDialog";
 
-export default function EnhancedTable() {
+export default function Unities() {
   const [order, setOrder] = useState<Order>("asc");
   const [orderBy, setOrderBy] = useState<keyof Unity>("name");
   const [selected, setSelected] = useState<Unity[]>([]);

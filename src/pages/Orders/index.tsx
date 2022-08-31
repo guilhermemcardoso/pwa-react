@@ -4,40 +4,40 @@ import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
 import Paper from "@mui/material/Paper";
 import { Container, Grid } from "@mui/material";
-import { Order } from "./types";
+import { SortOrder } from "./types";
 import { getComparator } from "./utils";
 import { TableHead, TableItem, TableToolbar } from "./components";
 import Footer from "../../components/Footer";
-import CreateEditProductDialog from "./components/CreateEditProductDialog";
-import { Product } from "../../models/Product";
+import { Order } from "../../models/Order";
+import { getOrders } from "../../services/firebase/firestore/order";
 import { getProducts } from "../../services/firebase/firestore/product";
-import DeleteProductDialog from "./components/DeleteProductDialog";
-import { getUnities } from "../../services/firebase/firestore/unity";
-import { Unity } from "../../models/Unity";
 import { getMaterials } from "../../services/firebase/firestore/material";
 import { Material } from "../../models/Material";
+import { Product } from "../../models/Product";
+import CreateEditOrderDialog from "./components/CreateEditOrderDialog";
+import DeleteOrderDialog from "./components/DeleteOrderDialog";
 
-export default function Products() {
-  const [order, setOrder] = useState<Order>("asc");
-  const [orderBy, setOrderBy] = useState<keyof Product>("name");
-  const [selected, setSelected] = useState<Product[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
+export default function Orders() {
+  const [order, setOrder] = useState<SortOrder>("asc");
+  const [orderBy, setOrderBy] = useState<keyof Order>("customerName");
+  const [selected, setSelected] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
-  const [unities, setUnities] = useState<Unity[]>([]);
-  const [showCreateEditProductDialog, setShowCreateEditProductDialog] =
+  const [products, setProducts] = useState<Product[]>([]);
+  const [showCreateEditOrderDialog, setShowCreateEditOrderDialog] =
     useState<boolean>(false);
-  const [showDeleteProductDialog, setShowDeleteProductDialog] =
+  const [showDeleteOrderDialog, setShowDeleteOrderDialog] =
     useState<boolean>(false);
 
   useEffect(() => {
-    loadProducts();
+    loadOrders();
     loadMaterials();
-    loadUnities();
+    loadProducts();
   }, []);
 
-  const loadUnities = async () => {
-    const items = await getUnities();
-    setUnities(items);
+  const loadProducts = async () => {
+    const items = await getProducts();
+    setProducts(items);
   };
 
   const loadMaterials = async () => {
@@ -45,14 +45,14 @@ export default function Products() {
     setMaterials(items);
   };
 
-  const loadProducts = async () => {
-    const items = await getProducts();
-    setProducts(items);
+  const loadOrders = async () => {
+    const items = await getOrders();
+    setOrders(items);
   };
 
   const handleRequestSort = (
     event: MouseEvent<unknown>,
-    property: keyof Product
+    property: keyof Order
   ) => {
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
@@ -61,16 +61,16 @@ export default function Products() {
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelected = products.map((n) => n);
+      const newSelected = orders.map((n) => n);
       setSelected(newSelected);
       return;
     }
     setSelected([]);
   };
 
-  const handleItemClick = (item: Product) => {
+  const handleItemClick = (item: Order) => {
     const selectedIndex = selected.findIndex((n) => n.id === item.id);
-    let newSelected: Product[] = [];
+    let newSelected: Order[] = [];
 
     if (selectedIndex === -1) {
       newSelected = newSelected.concat(selected, item);
@@ -89,36 +89,36 @@ export default function Products() {
   };
 
   const handleOnAddClick = () => {
-    setShowCreateEditProductDialog(true);
+    setShowCreateEditOrderDialog(true);
   };
 
   const handleOnDeleteClick = () => {
-    setShowDeleteProductDialog(true);
+    setShowDeleteOrderDialog(true);
   };
 
   const handleOnUpdateClick = () => {
-    setShowCreateEditProductDialog(true);
+    setShowCreateEditOrderDialog(true);
   };
 
-  const handleOnConfirmCreateEditProduct = async () => {
+  const handleOnConfirmCreateEditOrder = async () => {
     setSelected([]);
-    setShowCreateEditProductDialog(false);
-    await loadProducts();
+    setShowCreateEditOrderDialog(false);
+    await loadOrders();
   };
 
-  const handleOnCancelCreateEditProduct = () => {
+  const handleOnCancelCreateEditOrder = () => {
     setSelected([]);
-    setShowCreateEditProductDialog(false);
+    setShowCreateEditOrderDialog(false);
   };
 
-  const handleOnConfirmDeleteProduct = async () => {
+  const handleOnConfirmDeleteOrder = async () => {
     setSelected([]);
-    setShowDeleteProductDialog(false);
-    await loadProducts();
+    setShowDeleteOrderDialog(false);
+    await loadOrders();
   };
 
-  const handleOnCancelDeleteProduct = () => {
-    setShowDeleteProductDialog(false);
+  const handleOnCancelDeleteOrder = () => {
+    setShowDeleteOrderDialog(false);
   };
 
   const isSelected = useCallback(
@@ -149,10 +149,10 @@ export default function Products() {
                   orderBy={orderBy}
                   onSelectAllClick={handleSelectAllClick}
                   onRequestSort={handleRequestSort}
-                  rowCount={products.length}
+                  rowCount={orders.length}
                 />
                 <TableBody>
-                  {products
+                  {orders
                     .sort(getComparator(order, orderBy))
                     .map((row, index) => {
                       const isItemSelected = isSelected(row.id);
@@ -161,8 +161,7 @@ export default function Products() {
                           key={row.id}
                           onSelect={handleItemClick}
                           item={row}
-                          unities={unities}
-                          materials={materials}
+                          products={products}
                           selected={isItemSelected}
                         />
                       );
@@ -174,19 +173,19 @@ export default function Products() {
         </Grid>
       </Grid>
       <Footer />
-      <CreateEditProductDialog
-        open={showCreateEditProductDialog}
-        unities={unities}
+      <CreateEditOrderDialog
+        open={showCreateEditOrderDialog}
+        products={products}
         materials={materials}
         selectedItem={selected.length === 1 ? selected[0] : undefined}
-        onConfirm={handleOnConfirmCreateEditProduct}
-        onCancel={handleOnCancelCreateEditProduct}
+        onConfirm={handleOnConfirmCreateEditOrder}
+        onCancel={handleOnCancelCreateEditOrder}
       />
-      <DeleteProductDialog
-        open={showDeleteProductDialog}
+      <DeleteOrderDialog
+        open={showDeleteOrderDialog}
         selectedItems={selected}
-        onConfirm={handleOnConfirmDeleteProduct}
-        onCancel={handleOnCancelDeleteProduct}
+        onConfirm={handleOnConfirmDeleteOrder}
+        onCancel={handleOnCancelDeleteOrder}
       />
     </Container>
   );

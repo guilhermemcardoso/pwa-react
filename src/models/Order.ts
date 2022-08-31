@@ -1,9 +1,12 @@
-import { Product } from "./Product";
+export interface OrderProduct {
+  productId: string;
+  quantity: number;
+}
 
 export interface Order {
   id: string;
   description: string;
-  products: Product[];
+  products: OrderProduct[];
   discount: number;
   total: number;
   customerName: string;

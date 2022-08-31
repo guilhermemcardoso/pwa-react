@@ -3,17 +3,20 @@ import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import Checkbox from "@mui/material/Checkbox";
 import { Material } from "../../../../models/Material";
+import { Unity } from "../../../../models/Unity";
 
 interface TableItemProps {
   item: Material;
   onSelect: (item: Material) => void;
   selected: boolean;
+  unity?: Unity;
 }
 
 export default function TableItem({
   item,
   onSelect,
   selected,
+  unity,
 }: TableItemProps) {
   const handleClick = (event: React.MouseEvent<unknown>) => {
     onSelect(item);
@@ -43,7 +46,9 @@ export default function TableItem({
       </TableCell>
       <TableCell align="left">{item.description}</TableCell>
       <TableCell align="left">{item.quantity}</TableCell>
-      <TableCell align="left">{item.unityId}</TableCell>
+      <TableCell align="left">
+        {unity ? `${unity.name} (${unity.initials})` : ""}
+      </TableCell>
       <TableCell align="left">{item.createdAt}</TableCell>
     </TableRow>
   );

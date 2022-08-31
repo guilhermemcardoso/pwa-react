@@ -2,7 +2,7 @@ import { HeadCell } from "./types";
 
 export const headCells: readonly HeadCell[] = [
   {
-    id: "name",
+    id: "customerName",
     numeric: false,
     disablePadding: true,
     label: "Nome",
@@ -16,18 +16,25 @@ export const headCells: readonly HeadCell[] = [
     list: false,
   },
   {
-    id: "price",
+    id: "products",
+    numeric: false,
+    disablePadding: true,
+    label: "Produtos",
+    list: true,
+  },
+  {
+    id: "discount",
     numeric: true,
     disablePadding: true,
-    label: "Preço",
+    label: "Desconto (R$)",
     list: false,
   },
   {
-    id: "materials",
-    numeric: false,
+    id: "total",
+    numeric: true,
     disablePadding: true,
-    label: "Materiais",
-    list: true,
+    label: "Total (R$)",
+    list: false,
   },
   {
     id: "createdAt",

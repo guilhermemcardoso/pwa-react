@@ -6,18 +6,18 @@ import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import Checkbox from "@mui/material/Checkbox";
 import { visuallyHidden } from "@mui/utils";
-import { Order } from "../../types";
+import { SortOrder } from "../../types";
 import { headCells } from "../../constants";
-import { Product } from "../../../../models/Product";
+import { Order } from "../../../../models/Order";
 
 interface TableHeadProps {
   numSelected: number;
   onRequestSort: (
     event: React.MouseEvent<unknown>,
-    property: keyof Product
+    property: keyof Order
   ) => void;
   onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  order: Order;
+  order: SortOrder;
   orderBy: string;
   rowCount: number;
 }
@@ -32,7 +32,7 @@ function TableHead(props: TableHeadProps) {
     onRequestSort,
   } = props;
   const createSortHandler =
-    (property: keyof Product) => (event: React.MouseEvent<unknown>) => {
+    (property: keyof Order) => (event: React.MouseEvent<unknown>) => {
       onRequestSort(event, property);
     };
 

@@ -1,11 +1,11 @@
-import { Product } from "../../models/Product";
+import { Order } from "../../models/Order";
 
 export interface HeadCell {
   disablePadding: boolean;
-  id: keyof Product;
+  id: keyof Order;
   label: string;
   numeric: boolean;
   list: boolean;
 }
 
-export type Order = "asc" | "desc";
+export type SortOrder = "asc" | "desc";

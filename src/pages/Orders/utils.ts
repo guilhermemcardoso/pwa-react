@@ -1,4 +1,4 @@
-import { Order } from "./types";
+import { SortOrder } from "./types";
 
 export function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -11,7 +11,7 @@ export function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
 }
 
 export function getComparator<Key extends keyof any>(
-  order: Order,
+  order: SortOrder,
   orderBy: Key
 ): (
   a: { [key in Key]: number | string | object },

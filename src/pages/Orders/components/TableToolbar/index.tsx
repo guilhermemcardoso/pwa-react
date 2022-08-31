@@ -7,10 +7,10 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import AddIcon from "@mui/icons-material/Add";
 import { Box, Button } from "@mui/material";
-import { Product } from "../../../../models/Product";
+import { Order } from "../../../../models/Order";
 
 interface TableToolbarProps {
-  selectedItems: Product[];
+  selectedItems: Order[];
   onAddClick: () => void;
   onDeleteClick: () => void;
   onUpdateClick: () => void;
@@ -52,7 +52,7 @@ const TableToolbar = ({
           id="tableTitle"
           component="div"
         >
-          Produtos
+          Pedidos
         </Typography>
       )}
       {selectedItems.length > 0 ? (
@@ -71,7 +71,7 @@ const TableToolbar = ({
           )}
         </Box>
       ) : (
-        <Tooltip title="Adicionar produto">
+        <Tooltip title="Adicionar pedido">
           <Button variant="contained" onClick={onAddClick}>
             <AddIcon />
           </Button>

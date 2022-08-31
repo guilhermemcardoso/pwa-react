@@ -46,7 +46,7 @@ function TableHead(props: TableHeadProps) {
             checked={rowCount > 0 && numSelected === rowCount}
             onChange={onSelectAllClick}
             inputProps={{
-              "aria-label": "selecionar todos os materiais",
+              "aria-label": "selecionar todas as unid. medidas",
             }}
           />
         </TableCell>

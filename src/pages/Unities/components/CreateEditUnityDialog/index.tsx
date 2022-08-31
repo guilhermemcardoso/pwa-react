@@ -7,7 +7,6 @@ import {
   Container,
   CssBaseline,
   Grid,
-  SelectChangeEvent,
   TextField,
   Typography,
 } from "@mui/material";
@@ -71,7 +70,7 @@ export default function CreateEditUnityDialog({
       );
       return;
     }
-    
+
     setErrorMessage("");
     onConfirm();
   };
@@ -152,7 +151,7 @@ export default function CreateEditUnityDialog({
                 color="success"
                 sx={{ mt: 3, mb: 2 }}
               >
-                Adicionar
+                {selectedItem ? "Atualizar" : "Adicionar"}
               </Button>
             </DialogActions>
           </Box>

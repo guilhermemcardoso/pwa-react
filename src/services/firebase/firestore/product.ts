@@ -5,6 +5,8 @@ import {
   onSnapshot,
   query,
   collection,
+  getDocs,
+  deleteDoc,
 } from "firebase/firestore";
 import { Product } from "../../../models/Product";
 
@@ -49,4 +51,35 @@ export function listen(callback: (products: Product[]) => void) {
   });
 
   return unsubscribe;
+}
+
+export async function getProducts(): Promise<Product[]> {
+  try {
+    const db = getFirestore();
+    const q = query(collection(db, collectionName));
+
+    const querySnapshot = await getDocs(q);
+    const materials: Product[] = [];
+    querySnapshot.forEach((doc) => {
+      const material = doc.data() as Product;
+      materials.push(material);
+    });
+    return materials;
+  } catch (error) {
+    console.log("ERROR - getProducts", error);
+    return [];
+  }
+}
+
+export async function deleteProduct(materials: Product[]): Promise<boolean> {
+  const db = getFirestore();
+  try {
+    materials.map(async (item) => {
+      await deleteDoc(doc(db, collectionName, item.id));
+    });
+    return true;
+  } catch (error) {
+    console.log("ERROR - deleteProduct", error);
+    return false;
+  }
 }

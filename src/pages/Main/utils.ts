@@ -6,7 +6,7 @@ export function getPageTitleByRoute(path: string) {
       return "Pedidos";
     case "/main/products":
       return "Produtos";
-      case "/main/unities":
+    case "/main/unities":
       return "Unidades de Medida";
     default:
       return "Painel Geral";

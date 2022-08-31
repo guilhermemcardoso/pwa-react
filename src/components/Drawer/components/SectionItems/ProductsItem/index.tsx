@@ -1,25 +1,25 @@
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import ExtensionIcon from '@mui/icons-material/Extension';
+import ColorLensIcon from "@mui/icons-material/ColorLens";
 import { useNavigate } from "react-router-dom";
 import { SectionItemProps } from "../../..";
 
-const MaterialsItem = ({ toggleDrawer }: SectionItemProps) => {
+const ProductsItem = ({ toggleDrawer }: SectionItemProps) => {
   const navigate = useNavigate();
   const handleOnClick = () => {
-    navigate("materials");
+    navigate("products");
     toggleDrawer(false);
   };
 
   return (
     <ListItemButton>
       <ListItemIcon>
-        <ExtensionIcon onClick={handleOnClick} />
+        <ColorLensIcon onClick={handleOnClick} />
       </ListItemIcon>
-      <ListItemText primary="Materiais" onClick={handleOnClick} />
+      <ListItemText primary="Produtos" onClick={handleOnClick} />
     </ListItemButton>
   );
 };
 
-export default MaterialsItem;
+export default ProductsItem;

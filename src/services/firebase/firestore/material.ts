@@ -5,6 +5,8 @@ import {
   onSnapshot,
   query,
   collection,
+  getDocs,
+  deleteDoc,
 } from "firebase/firestore";
 import { Material } from "../../../models/Material";
 
@@ -49,4 +51,35 @@ export function listen(callback: (materials: Material[]) => void) {
   });
 
   return unsubscribe;
+}
+
+export async function getMaterials(): Promise<Material[]> {
+  try {
+    const db = getFirestore();
+    const q = query(collection(db, collectionName));
+
+    const querySnapshot = await getDocs(q);
+    const materials: Material[] = [];
+    querySnapshot.forEach((doc) => {
+      const material = doc.data() as Material;
+      materials.push(material);
+    });
+    return materials;
+  } catch (error) {
+    console.log("ERROR - getMaterials", error);
+    return [];
+  }
+}
+
+export async function deleteMaterial(materials: Material[]): Promise<boolean> {
+  const db = getFirestore();
+  try {
+    materials.map(async (item) => {
+      await deleteDoc(doc(db, collectionName, item.id));
+    });
+    return true;
+  } catch (error) {
+    console.log("ERROR - deleteMaterial", error);
+    return false;
+  }
 }

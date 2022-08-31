@@ -1,7 +1,7 @@
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import PeopleIcon from "@mui/icons-material/People";
+import ArchitectureIcon from '@mui/icons-material/Architecture';
 import { useNavigate } from "react-router-dom";
 import { SectionItemProps } from "../../..";
 
@@ -15,7 +15,7 @@ const UnitiesItem = ({ toggleDrawer }: SectionItemProps) => {
   return (
     <ListItemButton>
       <ListItemIcon>
-        <PeopleIcon onClick={handleOnClick} />
+        <ArchitectureIcon onClick={handleOnClick} />
       </ListItemIcon>
       <ListItemText primary="Unid. Medida" onClick={handleOnClick} />
     </ListItemButton>

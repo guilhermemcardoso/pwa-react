@@ -1,7 +1,5 @@
-import { Material } from "./Material";
-
-interface ProductMaterial {
-  item: Material;
+export interface ProductMaterial {
+  materialId: string;
   quantity: number;
 }
 
