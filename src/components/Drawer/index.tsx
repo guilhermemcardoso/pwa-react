@@ -9,7 +9,15 @@ import { MainItems, SecondaryItems } from "./components/Sections";
 
 interface DrawerProps {
   open: boolean;
-  toggleDrawer: () => void;
+  toggleDrawer: (open?: boolean) => void;
+}
+
+export interface SectionProps {
+  toggleDrawer: (open?: boolean) => void;
+}
+
+export interface SectionItemProps {
+  toggleDrawer: (open?: boolean) => void;
 }
 
 const drawerWidth: number = 240;
@@ -47,6 +55,9 @@ const DrawerComponent = styled(MuiDrawer, {
 }));
 
 function Drawer({ open, toggleDrawer }: DrawerProps) {
+  const handleToggleDrawer = () => {
+    toggleDrawer(false);
+  };
   return (
     <DrawerComponent variant="permanent" open={open}>
       <Toolbar
@@ -57,15 +68,15 @@ function Drawer({ open, toggleDrawer }: DrawerProps) {
           px: [1],
         }}
       >
-        <IconButton onClick={toggleDrawer}>
+        <IconButton onClick={handleToggleDrawer}>
           <ChevronLeftIcon />
         </IconButton>
       </Toolbar>
       <Divider />
       <List component="nav">
-        {MainItems}
+        <MainItems toggleDrawer={toggleDrawer} />
         <Divider sx={{ my: 1 }} />
-        {SecondaryItems}
+        <SecondaryItems toggleDrawer={toggleDrawer} />
       </List>
     </DrawerComponent>
   );

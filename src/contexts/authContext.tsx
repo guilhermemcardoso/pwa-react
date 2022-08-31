@@ -1,6 +1,6 @@
 import { User } from "firebase/auth";
 import { createContext, ReactNode, useContext, useState } from "react";
-import { firebaseSignIn, firebaseSignOut } from "../utils/firebase/auth";
+import { firebaseSignIn, firebaseSignOut } from "../services/firebase/auth";
 import { useLocalStorage } from "./localStorageContext";
 
 interface AuthProviderProps {

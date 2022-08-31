@@ -1,9 +1,8 @@
-import { lazy } from "react";
 import { Routes, Route, BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "../contexts/authContext";
 import { ProtectedRoute } from "./protectedRoute";
-const Dashboard = lazy(() => import("../pages/Dashboard"));
-const SignIn = lazy(() => import("../pages/SignIn"));
+import Main from "../pages/Main";
+import SignIn from "../pages/SignIn";
 
 function Router() {
   return (
@@ -12,10 +11,10 @@ function Router() {
         <Routes>
           <Route path="/" element={<SignIn />} />
           <Route
-            path="dashboard"
+            path="/main/*"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <Main />
               </ProtectedRoute>
             }
           />

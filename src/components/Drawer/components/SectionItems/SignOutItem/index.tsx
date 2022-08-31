@@ -6,8 +6,9 @@ import ConfirmSignOutDialog from "./components/ConfirmSignOutDialog";
 import { useState } from "react";
 import { useAuth } from "../../../../../contexts/authContext";
 import { useNavigate } from "react-router-dom";
+import { SectionItemProps } from "../../..";
 
-const SignOutItem = () => {
+const SignOutItem = ({ toggleDrawer }: SectionItemProps) => {
   const [showConfirmSignOutDialog, setShowConfirmSignOutDialog] =
     useState(false);
 
@@ -21,6 +22,7 @@ const SignOutItem = () => {
     setShowConfirmSignOutDialog(false);
     const response = await signOut();
     if (response) {
+      toggleDrawer(false);
       navigate("/", { replace: true });
     }
   };
@@ -32,7 +34,7 @@ const SignOutItem = () => {
   return (
     <ListItemButton>
       <ListItemIcon>
-        <ExitToAppIcon />
+        <ExitToAppIcon onClick={handleOnClick} />
       </ListItemIcon>
       <ListItemText primary="Sair" onClick={handleOnClick} />
       <ConfirmSignOutDialog

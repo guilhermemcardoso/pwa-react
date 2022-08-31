@@ -46,7 +46,7 @@ export default function SignIn() {
     setErrorMessage("");
     const signInResponse = await signIn(email, password);
     if (signInResponse) {
-      navigate("/dashboard");
+      navigate("/main/dashboard");
     }
 
     setErrorMessage("Email e/ou senha incorretos");
@@ -54,7 +54,7 @@ export default function SignIn() {
 
   useEffect(() => {
     if (user) {
-      navigate("/dashboard");
+      navigate("/main/dashboard");
     }
   }, [user, navigate]);
 

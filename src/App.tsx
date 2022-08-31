@@ -1,8 +1,8 @@
 import { ThemeProvider } from "@mui/material";
 import { useEffect } from "react";
-import Router from "./navigation/router";
+import Router from "./navigation/mainRouter";
 import theme from "./theme";
-import { initFirebase } from "./utils/firebase";
+import { initFirebase } from "./services/firebase";
 
 function App() {
   useEffect(() => {
@@ -11,7 +11,7 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
-        <Router />
+      <Router />
     </ThemeProvider>
   );
 }

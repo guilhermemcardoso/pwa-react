@@ -30,7 +30,7 @@ export default function ConfirmSignOutDialog({
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
     >
-      <Container maxWidth="sm" sx={{ p: 2 }}>
+      <Container maxWidth="md" sx={{ p: 2 }}>
         <Typography component="h3" variant="h6" color="primary" gutterBottom>
           Tem certeza de que deseja sair?
         </Typography>
