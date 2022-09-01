@@ -21,6 +21,7 @@ import { VALID_EMAIL_REGEX } from "../../constants/regex";
 import { useAuth } from "../../contexts/authContext";
 import { useNavigate } from "react-router-dom";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import InstallPWA from "../../components/InstallButton";
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -140,6 +141,7 @@ export default function SignIn() {
           <Link href="#" variant="body2">
             Esqueceu a senha?
           </Link>
+          <InstallPWA />
         </Box>
       </Box>
       <Footer sx={{ mt: 8, mb: 4 }} />
