@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import {
   LineChart,
@@ -9,33 +9,48 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import Title from "../Title";
+import { getOrders } from "../../services/firebase/firestore/order";
+import { isToday } from "../../utils/date";
+import { Order } from "../../models/Order";
 
-// Generate Sales Data
-function createData(time: string, amount?: number) {
-  return { time, amount };
+interface Data {
+  time: string;
+  amount: number;
 }
 
-const data = [
-  createData("00:00", 0),
-  createData("03:00", 300),
-  createData("06:00", 600),
-  createData("09:00", 800),
-  createData("12:00", 1500),
-  createData("15:00", 2000),
-  createData("18:00", 2400),
-  createData("21:00", 2400),
-  createData("24:00", undefined),
-];
+interface ChartProps {
+  data: Order[];
+}
 
-export default function Chart() {
+export default function Chart({ data }: ChartProps) {
   const theme = useTheme();
+  const [chartData, setChartData] = useState<Data[]>([]);
+
+  useEffect(() => {
+    loadData();
+  }, [data]);
+
+  const loadData = () => {
+    const todayOrders: Data[] = [];
+    data.forEach((order) => {
+      const orderDate = new Date(order.createdAt);
+      if (isToday(orderDate)) {
+        const newData: Data = {
+          time: order.createdAt,
+          amount: order.total,
+        };
+        todayOrders.push(newData);
+      }
+    });
+    setChartData(todayOrders);
+  };
 
   return (
     <React.Fragment>
-      <Title>Today</Title>
+      <Title>Hoje</Title>
       <ResponsiveContainer>
         <LineChart
-          data={data}
+          data={chartData}
           margin={{
             top: 16,
             right: 16,

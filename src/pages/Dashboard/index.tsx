@@ -3,14 +3,27 @@ import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import Chart from "../../components/Chart";
 import Deposits from "../../components/Deposits";
-import Orders from "../../components/Orders";
+import UnavailableMaterials from "../../components/UnavailableMaterials";
 import Footer from "../../components/Footer";
+import { Order } from "../../models/Order";
+import { useEffect, useState } from "react";
+import { getOrders } from "../../services/firebase/firestore/order";
 
 function Dashboard() {
+  const [orders, setOrders] = useState<Order[]>([]);
+
+  useEffect(() => {
+    loadOrders();
+  }, []);
+
+  const loadOrders = async () => {
+    const data = await getOrders();
+    setOrders(data);
+  };
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
       <Grid container spacing={3}>
-        {/* Chart */}
         <Grid item xs={12} md={8} lg={9}>
           <Paper
             sx={{
@@ -20,10 +33,9 @@ function Dashboard() {
               height: 240,
             }}
           >
-            <Chart />
+            <Chart data={orders} />
           </Paper>
         </Grid>
-        {/* Recent Deposits */}
         <Grid item xs={12} md={4} lg={3}>
           <Paper
             sx={{
@@ -33,13 +45,12 @@ function Dashboard() {
               height: 240,
             }}
           >
-            <Deposits />
+            <Deposits data={orders} />
           </Paper>
         </Grid>
-        {/* Recent Orders */}
         <Grid item xs={12}>
           <Paper sx={{ p: 2, display: "flex", flexDirection: "column" }}>
-            <Orders />
+            <UnavailableMaterials />
           </Paper>
         </Grid>
       </Grid>
