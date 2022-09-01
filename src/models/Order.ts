@@ -9,6 +9,7 @@ export interface Order {
   products: OrderProduct[];
   discount: number;
   total: number;
+  subtotal: number;
   customerName: string;
   createdAt: string;
 }

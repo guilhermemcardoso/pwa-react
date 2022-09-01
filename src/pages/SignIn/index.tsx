@@ -1,10 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import {
   Box,
   Button,
   Container,
   CssBaseline,
+  FormControl,
+  IconButton,
+  InputAdornment,
+  InputLabel,
   Link,
+  OutlinedInput,
   TextField,
   Typography,
 } from "@mui/material";
@@ -15,11 +20,15 @@ import "./style.css";
 import { VALID_EMAIL_REGEX } from "../../constants/regex";
 import { useAuth } from "../../contexts/authContext";
 import { useNavigate } from "react-router-dom";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 export default function SignIn() {
   const navigate = useNavigate();
   const { signIn, user, authLoading } = useAuth();
   const [errorMessage, setErrorMessage] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const validateFields = (email: string, password: string): boolean => {
     const isEmailValid = !!email.toLowerCase().match(VALID_EMAIL_REGEX);
@@ -28,16 +37,21 @@ export default function SignIn() {
     return isEmailValid && isPasswordValid;
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setEmail(value);
+  };
 
-    const email = (
-      event.currentTarget.elements.namedItem("email") as HTMLInputElement
-    ).value;
-    const password = (
-      event.currentTarget.elements.namedItem("password") as HTMLInputElement
-    ).value;
+  const handlePasswordChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setPassword(value);
+  };
 
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleSubmit = async () => {
     if (!validateFields(email, password)) {
       setErrorMessage("Email e/ou senha inválidos");
       return;
@@ -74,29 +88,40 @@ export default function SignIn() {
           src={require("../../assets/dashboard_logo.png")}
           alt="Dashboard Logo"
         />
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email"
-            name="email"
-            autoComplete="email"
-            autoFocus
-            error={errorMessage.length > 0}
-          />
-          <TextField
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Senha"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            error={errorMessage.length > 0}
-          />
+        <Box sx={{ mt: 1 }}>
+          <FormControl sx={{ mt: 2 }} fullWidth variant="outlined">
+            <InputLabel htmlFor="outlined-adornment-email">Email</InputLabel>
+            <OutlinedInput
+              id="outlined-adornment-email"
+              type={"text"}
+              value={email}
+              fullWidth
+              onChange={handleEmailChange}
+              label="Email"
+            />
+          </FormControl>
+          <FormControl sx={{ mt: 2 }} fullWidth variant="outlined">
+            <InputLabel htmlFor="outlined-adornment-password">Senha</InputLabel>
+            <OutlinedInput
+              id="outlined-adornment-password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={handlePasswordChange}
+              fullWidth
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              }
+              label="Senha"
+            />
+          </FormControl>
           <Box sx={{ mt: 1 }}>
             <Typography variant="body2" color="error" align="center">
               {errorMessage}
@@ -104,7 +129,7 @@ export default function SignIn() {
           </Box>
           <LoadingButton
             loading={authLoading}
-            type="submit"
+            onClick={handleSubmit}
             fullWidth
             variant="contained"
             size="large"

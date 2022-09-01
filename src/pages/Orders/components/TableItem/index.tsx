@@ -63,6 +63,7 @@ export default function TableItem({
       <TableCell align="left">{item.description}</TableCell>
       <TableCell align="left">{productCol}</TableCell>
       <TableCell align="left">{item.discount}</TableCell>
+      <TableCell align="left">{item.subtotal}</TableCell>
       <TableCell align="left">{item.total}</TableCell>
       <TableCell align="left">{item.createdAt}</TableCell>
     </TableRow>

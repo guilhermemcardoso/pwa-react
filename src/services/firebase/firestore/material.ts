@@ -7,6 +7,7 @@ import {
   collection,
   getDocs,
   deleteDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { Material } from "../../../models/Material";
 
@@ -35,6 +36,23 @@ export async function updateMaterial(
   } catch (error) {
     console.log("ERROR - updateMaterial", error);
     return undefined;
+  }
+}
+
+export async function updateMaterialAvailability(
+  materialId: string,
+  quantity: number
+): Promise<boolean> {
+  try {
+    const db = getFirestore();
+    const docRef = doc(db, collectionName, materialId);
+    await updateDoc(docRef, {
+      quantity: quantity,
+    });
+    return true;
+  } catch (error) {
+    console.log("ERROR - updateMaterialAvailability", error);
+    return false;
   }
 }
 

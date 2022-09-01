@@ -30,6 +30,13 @@ export const headCells: readonly HeadCell[] = [
     list: false,
   },
   {
+    id: "subtotal",
+    numeric: true,
+    disablePadding: true,
+    label: "Subtotal (R$)",
+    list: false,
+  },
+  {
     id: "total",
     numeric: true,
     disablePadding: true,

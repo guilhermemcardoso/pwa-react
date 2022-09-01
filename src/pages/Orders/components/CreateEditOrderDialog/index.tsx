@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useMemo, useState } from "react";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -6,9 +6,12 @@ import {
   Box,
   Container,
   CssBaseline,
+  FormControl,
   Grid,
+  InputAdornment,
   InputLabel,
   MenuItem,
+  OutlinedInput,
   Select,
   SelectChangeEvent,
   Table,
@@ -29,6 +32,9 @@ import {
 import { v4 as uuid } from "uuid";
 import TableItem from "./components/TableItem";
 import { Product } from "../../../../models/Product";
+import { LoadingButton } from "@mui/lab";
+import { updateMaterialAvailability } from "../../../../services/firebase/firestore/material";
+import { formatCurrency } from "../../../../utils/number";
 
 interface CreateEditOrderDialogProps {
   open: boolean;
@@ -48,30 +54,37 @@ export default function CreateEditOrderDialog({
   onCancel,
 }: CreateEditOrderDialogProps) {
   const [errorMessage, setErrorMessage] = useState("");
+  const [subtotal, setSubtotal] = useState(0);
+  const [discount, setDiscount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [canFinish, setCanFinish] = useState(true);
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
   const [mappedProducts, setMappedProducts] = useState<Map<string, number>>(
     new Map()
   );
+  const [mappedMaterials, setMappedMaterials] = useState<Map<string, number>>(
+    new Map()
+  );
 
-  useEffect(() => {
-    if (selectedItem) {
-      const newMappedProducts = new Map();
-      const newSelectedProducts: Product[] = [];
-      selectedItem.products.forEach((productItem: OrderProduct) => {
-        const product = products.find(
-          (item) => item.id === productItem.productId
-        );
+  // useEffect(() => {
+  //   if (selectedItem) {
+  //     const newMappedProducts = new Map();
+  //     const newSelectedProducts: Product[] = [];
+  //     selectedItem.products.forEach((productItem: OrderProduct) => {
+  //       const product = products.find(
+  //         (item) => item.id === productItem.productId
+  //       );
 
-        if (product) {
-          newMappedProducts.set(product.id, productItem.quantity);
-          newSelectedProducts.push(product);
-        }
-      });
+  //       if (product) {
+  //         newMappedProducts.set(product.id, productItem.quantity);
+  //         newSelectedProducts.push(product);
+  //       }
+  //     });
 
-      setSelectedProducts(newSelectedProducts);
-      setMappedProducts(newMappedProducts);
-    }
-  }, [selectedItem, products]);
+  //     setSelectedProducts(newSelectedProducts);
+  //     setMappedProducts(newMappedProducts);
+  //   }
+  // }, [selectedItem, products]);
 
   const title = useMemo(
     () => (selectedItem ? "Editar Pedido" : "Novo Pedido"),
@@ -90,76 +103,124 @@ export default function CreateEditOrderDialog({
       if (alreadyExists) {
         return;
       }
+
       newSelectedProducts.push(newProduct);
       newMappedProducts.set(newProduct.id, 0);
     }
+
     setSelectedProducts(newSelectedProducts);
     setMappedProducts(newMappedProducts);
   };
 
+  const handleOnChangeDiscount = (event: ChangeEvent<HTMLInputElement>) => {
+    const value = event.currentTarget.value;
+    try {
+      setDiscount(Number(value));
+    } catch (error) {
+      setDiscount(0);
+    }
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setLoading(true);
 
-    const customerName = (
-      event.currentTarget.elements.namedItem("customerName") as HTMLInputElement
-    ).value;
+    try {
+      const customerName = (
+        event.currentTarget.elements.namedItem(
+          "customerName"
+        ) as HTMLInputElement
+      ).value;
 
-    const discount = (
-      event.currentTarget.elements.namedItem("discount") as HTMLInputElement
-    ).value;
+      const orderDescription = (
+        event.currentTarget.elements.namedItem(
+          "orderDescription"
+        ) as HTMLInputElement
+      ).value;
 
-    const orderDescription = (
-      event.currentTarget.elements.namedItem(
-        "orderDescription"
-      ) as HTMLInputElement
-    ).value;
+      const productList: OrderProduct[] = [];
 
-    const productList: OrderProduct[] = [];
-    let total = 0;
-    mappedProducts?.forEach((value, key) => {
-      const productItem = selectedProducts.find((item) => item.id === key);
-      if (productItem) {
-        total = total + productItem.price * value;
+      mappedProducts?.forEach((value, key) => {
+        const product: OrderProduct = { productId: key, quantity: value };
+        productList.push(product);
+      });
+
+      const order: Order = {
+        id: selectedItem ? selectedItem.id : uuid(),
+        customerName: customerName,
+        description: orderDescription,
+        discount: Number(discount),
+        subtotal: subtotal,
+        total: subtotal - Number(discount),
+        products: productList,
+        createdAt: selectedItem
+          ? selectedItem.createdAt
+          : new Date().toDateString(),
+      };
+
+      let response = undefined;
+      if (selectedItem) {
+        response = await updateOrder(order);
+      } else {
+        response = await addOrder(order);
+        const usedMaterials = new Map();
+        order.products.forEach((productId) => {
+          const product = products.find(
+            (item) => item.id === productId.productId
+          );
+          if (product) {
+            product.materials.forEach((materialId) => {
+              const materialExists = usedMaterials.get(materialId.materialId);
+              if (materialExists) {
+                usedMaterials.set(
+                  materialId.materialId,
+                  materialExists + materialId.quantity * productId.quantity
+                );
+              } else {
+                usedMaterials.set(
+                  materialId.materialId,
+                  materialId.quantity * productId.quantity
+                );
+              }
+            });
+          }
+        });
+        usedMaterials.forEach((value, key) => {
+          const material = materials.find((item) => item.id === key);
+          if (material) {
+            updateMaterialAvailability(material.id, material.quantity - value);
+          }
+        });
       }
-      const product: OrderProduct = { productId: key, quantity: value };
-      productList.push(product);
-    });
 
-    const order: Order = {
-      id: selectedItem ? selectedItem.id : uuid(),
-      customerName: customerName,
-      description: orderDescription,
-      discount: Number(discount),
-      total: total,
-      products: productList,
-      createdAt: selectedItem
-        ? selectedItem.createdAt
-        : new Date().toDateString(),
-    };
+      if (!response) {
+        setErrorMessage(
+          "Não foi possível realizar esta ação no momento. Tente mais tarde."
+        );
+        setLoading(false);
+        return;
+      }
 
-    let response = undefined;
-    if (selectedItem) {
-      response = await updateOrder(order);
-    } else {
-      response = await addOrder(order);
-    }
-
-    if (!response) {
+      setErrorMessage("");
+      setSelectedProducts([]);
+      setMappedProducts(new Map());
+      setLoading(false);
+      onConfirm();
+    } catch (error) {
       setErrorMessage(
         "Não foi possível realizar esta ação no momento. Tente mais tarde."
       );
+      setLoading(false);
       return;
     }
-
-    setErrorMessage("");
-    setSelectedProducts([]);
-    setMappedProducts(new Map());
-    onConfirm();
   };
 
   const handleCancel = () => {
     setSelectedProducts([]);
     setMappedProducts(new Map());
+    setSubtotal(0);
+    setDiscount(0);
+    setErrorMessage("");
     onCancel();
   };
 
@@ -168,8 +229,53 @@ export default function CreateEditOrderDialog({
       (item) => item.id !== product.id
     );
     const newMappedProducts = new Map(mappedProducts);
+    const newMappedMaterials = new Map();
+    let message = "";
+
     newMappedProducts.delete(product.id);
 
+    let newSubtotal = 0;
+    newMappedProducts?.forEach((value, key) => {
+      const productItem = newSelectedProducts.find((item) => item.id === key);
+      if (productItem) {
+        newSubtotal = newSubtotal + productItem.price * value;
+      }
+
+      const product = products.find((item) => item.id === key);
+      if (!product) {
+        return;
+      }
+
+      product.materials.forEach((materialItem) => {
+        const material = materials.find(
+          (item) => item.id === materialItem.materialId
+        );
+        if (!material) {
+          return;
+        }
+
+        const alreadyExists = newMappedMaterials.get(material.id);
+        const newMaterialQuantity = alreadyExists
+          ? alreadyExists + value * materialItem.quantity
+          : value * materialItem.quantity;
+        newMappedMaterials.set(material.id, newMaterialQuantity);
+        if (newMaterialQuantity > material.quantity) {
+          setCanFinish(false);
+          if (message.length === 0) {
+            message = `Quantidade de materiais insuficiente para produzir os itens selecionados. (${material.name}`;
+          } else {
+            message += `, ${material.name}`;
+          }
+        }
+      });
+    });
+
+    if (message.length > 0) {
+      message += ")";
+    }
+
+    setErrorMessage(message);
+    setSubtotal(newSubtotal);
     setSelectedProducts(newSelectedProducts);
     setMappedProducts(newMappedProducts);
   };
@@ -180,8 +286,58 @@ export default function CreateEditOrderDialog({
     index: number
   ) => {
     const newMappedProducts = new Map(mappedProducts);
+    const newMappedMaterials = new Map();
+    setCanFinish(true);
+    setErrorMessage("");
 
+    let message = "";
     newMappedProducts.set(product.id, Number(value) || 0);
+
+    let newSubtotal = 0;
+    newMappedProducts?.forEach((value, key) => {
+      const productItem = selectedProducts.find((item) => item.id === key);
+      if (productItem) {
+        newSubtotal = newSubtotal + productItem.price * value;
+      }
+    });
+
+    newMappedProducts.forEach((productValue, productKey) => {
+      const product = products.find((item) => item.id === productKey);
+      if (!product) {
+        return;
+      }
+
+      product.materials.forEach((materialItem) => {
+        const material = materials.find(
+          (item) => item.id === materialItem.materialId
+        );
+        if (!material) {
+          return;
+        }
+
+        const alreadyExists = newMappedMaterials.get(material.id);
+        const newMaterialQuantity = alreadyExists
+          ? alreadyExists + productValue * materialItem.quantity
+          : productValue * materialItem.quantity;
+        newMappedMaterials.set(material.id, newMaterialQuantity);
+        if (newMaterialQuantity > material.quantity) {
+          setCanFinish(false);
+          if (message.length === 0) {
+            message = `Quantidade de materiais insuficiente para produzir os itens selecionados. (${material.name}`;
+          } else {
+            message += `, ${material.name}`;
+          }
+        }
+      });
+    });
+
+    if (message.length > 0) {
+      message += ")";
+    }
+
+    setErrorMessage(message);
+    setSubtotal(newSubtotal);
+    setMappedMaterials(newMappedMaterials);
     setMappedProducts(newMappedProducts);
   };
 
@@ -221,18 +377,28 @@ export default function CreateEditOrderDialog({
                   label="Nome do Cliente"
                   autoFocus
                   defaultValue={selectedItem?.customerName || ""}
-                  error={errorMessage.length > 0}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  id="discount"
-                  label="Desconto (R$)"
-                  name="description"
-                  defaultValue={selectedItem?.discount || ""}
-                />
+                <FormControl fullWidth variant="outlined">
+                  <InputLabel htmlFor="outlined-adornment-discount">
+                    Desconto
+                  </InputLabel>
+                  <OutlinedInput
+                    id="outlined-adornment-discount"
+                    fullWidth
+                    name="discount"
+                    onChange={handleOnChangeDiscount}
+                    defaultValue={selectedItem ? selectedItem.discount : ""}
+                    value={discount}
+                    startAdornment={
+                      <InputAdornment position="start">
+                        <Typography>R$</Typography>
+                      </InputAdornment>
+                    }
+                    label="Desconto"
+                  />
+                </FormControl>
               </Grid>
               <Grid item xs={12} sm={12}>
                 <TextField
@@ -250,7 +416,7 @@ export default function CreateEditOrderDialog({
                   labelId="unity-label"
                   id="products"
                   fullWidth
-                  label="Produtos"
+                  value=""
                   onChange={handleSelectedProductChange}
                 >
                   {products.map((product) => (
@@ -295,6 +461,58 @@ export default function CreateEditOrderDialog({
                 </Typography>
               </Box>
             </Grid>
+            {selectedProducts.length > 0 && (
+              <Grid item xs={12}>
+                <Box
+                  sx={{
+                    mt: 1,
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography variant="body2" align="center">
+                    Subtotal:
+                  </Typography>
+                  <Typography variant="body1" align="center">
+                    {formatCurrency(subtotal)}
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    mt: 1,
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography variant="body2" align="center">
+                    Desconto:
+                  </Typography>
+                  <Typography variant="body1" align="center">
+                    {`- ${formatCurrency(discount)}`}
+                  </Typography>
+                </Box>
+                <Box
+                  sx={{
+                    mt: 1,
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography variant="body2" align="center">
+                    Total:
+                  </Typography>
+                  <Typography variant="body1" align="center">
+                    {`${formatCurrency(subtotal - discount)}`}
+                  </Typography>
+                </Box>
+              </Grid>
+            )}
             <DialogActions>
               <Button
                 onClick={handleCancel}
@@ -304,14 +522,16 @@ export default function CreateEditOrderDialog({
               >
                 Cancelar
               </Button>
-              <Button
+              <LoadingButton
+                disabled={!canFinish || selectedProducts.length === 0}
+                loading={loading}
                 type="submit"
                 variant="contained"
                 color="success"
                 sx={{ mt: 3, mb: 2 }}
               >
                 {selectedItem ? "Atualizar" : "Adicionar"}
-              </Button>
+              </LoadingButton>
             </DialogActions>
           </Box>
         </Box>
